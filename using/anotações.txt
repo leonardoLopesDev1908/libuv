@@ -1,0 +1,2 @@
+Usar esse módulo para fazer uso da biblioteca, testar e entender os métodos
+

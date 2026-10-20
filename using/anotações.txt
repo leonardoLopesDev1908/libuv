@@ -1,2 +1,39 @@
 Usar esse módulo para fazer uso da biblioteca, testar e entender os métodos
 
+Anotações 13/10:
+
+    Inicialização de loop e timer; 
+
+    start timer com callback (fire), 5 segundos de timeout e 1 segundo para repetição;
+
+    A lib usa herança com structs usando macros em comum, como é o caso de 
+    uv_stream_t, que é parent class para, por exemplo uv_tcp_t.
+
+    struct uv_stream_s {
+        UV_HANDLE_FIELDS
+        UV_STREAM_FIELDS
+    };
+
+    /*
+    * uv_tcp_t is a subclass of uv_stream_t.
+    *
+    * Represents a TCP stream or TCP server.
+    */
+    struct uv_tcp_s {
+        UV_HANDLE_FIELDS
+        UV_STREAM_FIELDS
+        UV_TCP_PRIVATE_FIELDS
+    };
+
+    err = uv_tcp_init(loop, &tcp);
+
+    uv_timer_t timer = {0};
+    err = uv_timer_init(loop, &timer);
+
+    err = uv_timer_start(&timer, fire, 5*1000, 1000);
+
+    err = uv_run(loop, 0); 
+    uv_loop_close(loop);
+    uv_library_shutdown();
+
+    Proximos passos: Seguir vídeo e tentar usar o uv_listen com tcp stream

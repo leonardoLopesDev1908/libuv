@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 void close_cb(uv_handle_t* handle)
 {
+    free(handle);
     printf("Closing...\n");
 }
 
@@ -13,7 +15,7 @@ int end_chat(const uv_buf_t *buf)
     char *base = buf->base;
     base[4] = '\0';
 
-    return strcmp(base, exit);
+    return strcmp(base, exit) != 0;
 }
 
 void fire(uv_timer_t *timer)
@@ -37,7 +39,7 @@ void default_alloc_cb(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 
 void echo_cb(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
 {
-    if(!end_chat(buf)){
+    if(end_chat(buf)){
         uv_close((void*)&stream, close_cb);
         free(stream);
       
@@ -46,8 +48,9 @@ void echo_cb(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
 
     int err;
     uv_write_t *write_t = (uv_write_t*)malloc(sizeof(uv_write_t));
+    uv_buf_t write_buf = uv_buf_init(buf->base, buf->len);
 
-    if((err = uv_write(write_t, stream, buf, 1, write_cb)) != 0)
+    if((err = uv_write(write_t, stream, &write_buf, 1, write_cb)) != 0)
     {
         printf("ERROR uv_write: %s\n", uv_strerror(err));
         free(write_t);
@@ -123,20 +126,6 @@ int main()
         printf("ERROR: %s\n", uv_strerror(err));
         exit(1);
     }
-
-    // //TIMER
-    // uv_timer_t timer = {0};
-    // err = uv_timer_init(loop, &timer);
-    // if(err != 0){
-    //     printf("Error timer_init: %s\n", uv_strerror(err));
-    //     exit(1);
-    // }
-
-    // err = uv_timer_start(&timer, fire, 5*1000, 1000);
-    // if(err != 0) {
-    //     printf("Error timer_start: %s\n", uv_strerror(err));
-    //     exit(1);
-    // }
 
     err = uv_run(loop, 0); 
     if(err != 0) 
